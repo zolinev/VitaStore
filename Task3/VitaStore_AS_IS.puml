@@ -1,0 +1,31 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+
+title VitaStore — As-Is
+
+Boundary(store, "Локальный магазин (Каждая из 500+ точек)") {
+    Container(cash_pc, "ПК Кассира (Толстый клиент)", "Windows Desktop App", "Регистрация продаж, логика чека")
+    ContainerDb(local_db, "Локальная БД магазина", "MS SQL Express", "Хранение прайс-листов, остатков и транзакций точки")
+    Container(bank_term, "Банковский терминал", "Hardware", "Разнородный парк устройств (Сбербанк, Ingenico и др.)")
+    Container(fr, "Фискальный регистратор", "Hardware", "Печать чеков ")
+}
+
+Boundary(hq, "Центральный офис (HQ On-Premise)") {
+    Container(sap_erp, "SAP ERP", , "Мастер-система: товарный учет, кадры, финансы, лояльность, Promo Engine")
+   ' Container(promo_eng, "Promo Engine", "Java / Spring", "Единый движок промоакций сети")
+    Container(ftp_server, "FTP-сервер обновлений", "Linux FTP", "Буфер для ночной рассылки данных")
+}
+
+' Взаимосвязи компонентов
+Rel(cash_pc, local_db, "Прямые SQL-запросы (чтение/запись)")
+Rel(cash_pc, bank_term, "Жесткая связка через уникальные драйверы")
+Rel(cash_pc, fr, "Прямое управление печатью")
+
+Rel(sap_erp, ftp_server, "Выгрузка цен и номенклатуры", "Пакетный экспорт")
+Rel(ftp_server, local_db, "Ночная рассылка XML-прайсов в 02:00 ночи", "FTP / XML")
+
+@enduml
